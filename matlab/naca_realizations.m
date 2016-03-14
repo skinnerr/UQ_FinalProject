@@ -23,4 +23,13 @@ function [ ] = naca_realizations()
     axis square;
     axis equal;
     
+    % Plot the un-cambered airfoil.
+    figure();
+    plot( [x,flip(x)], [yt,flip(-yt)]);
+    axis equal;
+    xlabel('x');
+    ylabel('y');
+    xlim([0,c]+[-1,1]*c/10);
+    ylim(1.1*[-t,t]*c);
+    
 end

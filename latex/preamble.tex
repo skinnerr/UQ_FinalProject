@@ -123,7 +123,7 @@ basicstyle=\ttfamily
 \lstset{breaklines,breakatwhitespace}
 
 % Define a chacacter as shorthand for inline listings.
-\lstMakeShortInline[basicstyle=\color{cyan!60!black}\small]{`}
+\lstMakeShortInline[basicstyle=\color{cyan!60!black}\small]{|}
 
 %%
 %% COMMANDS
@@ -169,6 +169,12 @@ basicstyle=\ttfamily
 
 % Big O notation
 \newcommand{\bigo}{\ensuremath{\mathcal{O}}}
+
+% Derivatives
+\newcommand{\dd}[2]{\ensuremath{\frac{d #1}{d #2}}}
+\newcommand{\pdd}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\newcommand{\tdd}[2]{\ensuremath{d #1 / d #2}}
+\newcommand{\tpdd}[2]{\ensuremath{\partial #1 / \partial #2}}
 
 % Text max and min
 \newcommand{\tmax}{\ensuremath{\text{max}}}
