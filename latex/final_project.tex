@@ -1,0 +1,79 @@
+\documentclass[11pt]{article}
+
+\input{./preamble.tex}
+
+%%
+%% DOCUMENT START
+%%
+
+\begin{document}
+\fancypagestyle{allpages}
+{
+	\fancyhf[LH]{\rightmark}
+	\fancyhf[CH]{}
+	\fancyhf[RH]{\thepage\hspace*{1ex}/\hspace*{1ex}\pageref{lastpage}}
+	\fancyhf[LF]{}
+	\fancyhf[CF]{}
+	\fancyhf[RF]{}
+}
+
+\fancypagestyle{firstpage}
+{
+	\fancyhf[LH]{\Large Final Project \\ \large ASEN 6519: Uncertainty Quantification}
+	\fancyhf[CH]{}
+	\fancyhf[RH]{\large Ryan Skinner \\ \large Due 2016/??/??}
+	\fancyhf[LF]{}
+	\fancyhf[CF]{}
+	\fancyhf[RF]{}
+}
+
+\pagestyle{allpages}
+\thispagestyle{firstpage}
+\renewcommand{\sectionmark}[1]{ \markright{#1}{} }
+
+\vspace*{0in}
+\begin{center}
+\LARGE Impact of Geometric Uncertainty on a NACA 4412 Airfoil
+\end{center}
+\vspace*{0.3in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%
+%% DOCUMENT END
+%%
+\label{lastpage}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
