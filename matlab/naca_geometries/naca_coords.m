@@ -1,4 +1,4 @@
-function [yt, xu, yu, xl, yl] = naca_coords(x, m, p, t)
+function [yt, xu, yu, xl, yl] = naca_coords(x, m, p, t, a)
 %%%
 % Generates upper (xu, yu) and lower (xl, yl) surfaces of a 4-digit NACA airfoil.
 %
@@ -34,6 +34,21 @@ function [yt, xu, yu, xl, yl] = naca_coords(x, m, p, t)
     xl = x + yt .* sin(theta);
     yu = yc + yt .* cos(theta);
     yl = yc - yt .* cos(theta);
+    
+    % Change sign of a so it specifies a clockwise rotation of the airfoil, convert to
+    % radians.
+    a = -a * pi / 180;
+    
+    % Rotate new surface coordinate pairs for angle of attack.
+    for i = 1:length(x)
+        rotmat = [cos(a), -sin(a); sin(a), cos(a)];
+        tmp = rotmat * [xu(i);yu(i)];
+        xu(i) = tmp(1);
+        yu(i) = tmp(2);
+        tmp = rotmat * [xl(i);yl(i)];
+        xl(i) = tmp(1);
+        yl(i) = tmp(2);
+    end
     
 end
 
