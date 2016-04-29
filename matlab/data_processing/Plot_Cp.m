@@ -1,6 +1,6 @@
 function [] = Plot_Cp()
 
-    nfiles = 1;
+    nfiles = 100;
 
     %%%
     % Load data from NACA realizations
@@ -29,7 +29,7 @@ function [] = Plot_Cp()
     figure();
     for i = 1:nfiles
         hold on;
-        plot(NACA_data(i).xnorm, NACA_data(i).y, '-');
+        plot(NACA_data(i).xnorm, NACA_data(i).cp, '-');
     end
 
 end

@@ -12,7 +12,7 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
     % Load the remaining '.csv' files and build the output data structure.
     %%%
     
-%     try
+    try
         
         load_str = 'Sorting nodal point data...';
         hwait = waitbar(0,sprintf('%s %i / %i',load_str,1,length(data)), ...
@@ -29,23 +29,24 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
             
             % Extract the run number from the loaded file's ID string (from its filename).
             run_number = strsplit(data(i).IDstr,'-');
-            run_number = str2num(run_number{end});
+            run_number = str2num(run_number{end}); %#ok<ST2NM>
             run_number = run_number - starting_run_number;
             
             % Grab the parameters used to generate this realization of airfoil data.
-            m = naca_params(run_number,1);
-            p = naca_params(run_number,2);
-            t = naca_params(run_number,3);
-            c = naca_params(run_number,4);
-            a = naca_params(run_number,5);
-            c = 1.00893; % Value in the file (1.0) is wrong; actual geometry uses 1.00893.
+            m  = naca_params(run_number,1);
+            p  = naca_params(run_number,2);
+            c0 = naca_params(run_number,4); % Value of c used to generate the geometry.
+            c  = 1.00893; % Actual length of the geometry.
+            a  = naca_params(run_number,5);
             
             % Sort x-coordinates.
             [x_sorted, order] = sort(data(i).x);
             
+            % Calculate the camber line for this airfoil.
+            camber_line = NACA_Camber_Line(x_sorted, m, p, c0, c, a);
+            
             % Determine what points are on top or bottom surface of airfoil.
-            camber_line = NACA_Camber_Line(data(i).x, m, p, t, c, a);
-            top_indices = x_sorted' > camber_line;
+            top_indices = data(i).y(order) > camber_line;
             bot_indices = ~top_indices;
             
             % Split the order to top indices go first, followed by negative indies in
@@ -53,7 +54,7 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
             order = [order(top_indices); flip(order(bot_indices))];
             
             % Re-order the elements of the data matrix corresponding to this run.
-            data_out(i).IDstr = data(i).IDstr;
+            data_out(i).IDstr = data(i).IDstr; %#ok<*AGROW>
             data_out(i).x     = data(i).x(order);
             data_out(i).xnorm = data(i).xnorm(order);
             data_out(i).y     = data(i).y(order);
@@ -64,11 +65,12 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
             
         end
         
-%     catch
-%         
-%         delete(hwait);
-%         
-%     end
+    catch err
+        
+        delete(hwait);
+        rethrow(err);
+        
+    end
 
     delete(hwait);
 
