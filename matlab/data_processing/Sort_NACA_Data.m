@@ -1,16 +1,10 @@
-function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
+function [ data_out ] = Sort_NACA_Data( naca_params, data, starting_run_number, thresh )
 %%%
 % Sorts data points within each entry of the NACA data structure, such that they progress
 % around the circumference of the deformed wing. This is done by computing the camber line
 % of the deformed airfoil, and identifying nodes above and below it. These two sets of
 % nodes are then sorted by increasing and decreasing x-coordinate, respectively.
 %%%
-	
-	naca_params = csvread(params_path,1,0);
-    
-    %%%
-    % Load the remaining '.csv' files and build the output data structure.
-    %%%
     
     try
         
@@ -19,6 +13,7 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
                         'CreateCancelBtn','setappdata(gcbf,''cancel_loading'',1)');
         setappdata(hwait,'cancel_loading',0);
         
+        n_skipped = 0;
         for i = 1:length(data)
             
             if getappdata(hwait,'cancel_loading')
@@ -39,6 +34,12 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
             c  = 1.00893; % Actual length of the geometry.
             a  = naca_params(run_number,5);
             
+            % Skip if angle of attack is above a certain threshold.
+            if a > thresh
+                n_skipped = n_skipped + 1;
+                continue;
+            end
+            
             % Sort x-coordinates.
             [x_sorted, order] = sort(data(i).x);
             
@@ -54,14 +55,14 @@ function [ data_out ] = Sort_NACA_Data( params_path, data, starting_run_number )
             order = [order(top_indices); flip(order(bot_indices))];
             
             % Re-order the elements of the data matrix corresponding to this run.
-            data_out(i).IDstr = data(i).IDstr; %#ok<*AGROW>
-            data_out(i).x     = data(i).x(order);
-            data_out(i).xnorm = data(i).xnorm(order);
-            data_out(i).y     = data(i).y(order);
-            data_out(i).p     = data(i).p(order);
-            data_out(i).cp    = data(i).cp(order);
-            data_out(i).ref   = data(i).ref;
-            data_out(i).filename = data(i).filename;
+            data_out(i-n_skipped).IDstr = data(i).IDstr; %#ok<*AGROW>
+            data_out(i-n_skipped).x     = data(i).x(order);
+            data_out(i-n_skipped).xnorm = data(i).xnorm(order);
+            data_out(i-n_skipped).y     = data(i).y(order);
+            data_out(i-n_skipped).p     = data(i).p(order);
+            data_out(i-n_skipped).cp    = data(i).cp(order);
+            data_out(i-n_skipped).ref   = data(i).ref;
+            data_out(i-n_skipped).filename = data(i).filename;
             
         end
         

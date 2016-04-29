@@ -65,14 +65,14 @@ function [ NACA_data ] = Load_NACA_Directory( varargin )
     %%%
     
     try
-        load_str = 'Sorting nodal point data...';
+        load_str = 'Loading data...';
         hwait = waitbar(0,sprintf('%s %i / %i',load_str,1,length(files)), ...
                         'CreateCancelBtn','setappdata(gcbf,''cancel_loading'',1)');
         setappdata(hwait,'cancel_loading',0);
         for i = 1:length(files)
             if getappdata(hwait,'cancel_loading')
                 delete(hwait);
-                error('Nodal point sorting canceled by user. Program stopped.');
+                error('Directory loading canceled by user. Program stopped.');
             end
             waitbar(i/length(files),hwait,sprintf('%s %i / %i',load_str,i,length(files)));
             [NACA_data(i).IDstr, ...
