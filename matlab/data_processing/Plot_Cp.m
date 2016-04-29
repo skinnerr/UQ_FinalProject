@@ -2,7 +2,7 @@ function [] = Plot_Cp()
 
     Set_Default_Plot_Properties();
 
-    nfiles = 1000;
+    nfiles = 100;
     fprintf('Reading %i files\n',nfiles);
 
     %%%
@@ -10,7 +10,7 @@ function [] = Plot_Cp()
     %%%
     
     path = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-            'ASEN_6519_Uncertainty_Quantification/Final_Project/data/high-fidelity/'];
+            'ASEN_6519_Uncertainty_Quantification/Final_Project/data/low-fidelity/'];
              
     NACA_data = Load_NACA_Directory(path, 'wing', nfiles);
     
