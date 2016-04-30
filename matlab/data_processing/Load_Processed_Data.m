@@ -1,4 +1,4 @@
-function [ NACA_data ] = Load_Sorted_Data( identifier_string, nfiles, alpha_threshold )
+function [ NACA_data ] = Load_Processed_Data( identifier_string, nfiles, alpha_threshold )
 
     fprintf('Reading %i files from %s\n',nfiles,identifier_string);
 

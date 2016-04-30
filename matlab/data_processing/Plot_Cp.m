@@ -4,7 +4,7 @@ function [] = Plot_Cp()
 
     nfiles = 100;
     alpha_threshold = 0;
-    NACA_data = Load_Sorted_Data('LF-1000', nfiles, alpha_threshold);
+    NACA_data = Load_Processed_Data('LF-1000', nfiles, alpha_threshold);
 
     %%%
     % Plot stuff!
