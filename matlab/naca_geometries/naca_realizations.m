@@ -3,10 +3,10 @@ function [ ] = naca_realizations()
     Set_Default_Plot_Properties();
     
     % For a NACA airfoil numbered xyzz...
-    m = [0.0, 0.1]; % Max camber (x/100)
-    p = [0.3, 0.6]; % Location of max camber (y/10)
-    t = [0.05, 0.2]; % Max thickness over chord (zz / 100)
-    a = [0, 7];  % Angle of attack
+    m = getRange(0.04, 0); % Max camber (x/100)
+    p = getRange(0.4, 0); % Location of max camber (y/10)
+    t = getRange(0.12, 0); % Max thickness over chord (zz / 100)
+    a = [-2,2];  % Angle of attack
     
     points = 201;
     c = 1.0;        % Chord length
@@ -16,7 +16,7 @@ function [ ] = naca_realizations()
     figure();
     hold on;
     
-    N = 10000;
+    N = 1000;
     params = nan(N,5);
     for i = 1:N
         rm = randu(m);
@@ -35,7 +35,8 @@ function [ ] = naca_realizations()
     axis square;
     axis equal;
     
-%     writetable(array2table(params, 'VariableNames', {'m','p','t','c','a'}), 'naca_params_smaller.csv');
+    writetable(array2table(params, 'VariableNames', {'m','p','t','c','a'}), ...
+               '../naca_params_4412alphaneg2to2.csv');
     
     
     if false
@@ -55,5 +56,11 @@ function [ x ] = randu( range )
 
     dif = range(2) - range(1);
     x = range(1) + rand() * dif;
+
+end
+
+function [ range ] = getRange( val, pmerr )
+
+    range = [val - val*pmerr, val + val*pmerr];
 
 end
