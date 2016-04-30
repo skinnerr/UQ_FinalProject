@@ -3,33 +3,8 @@ function [] = Plot_Cp()
     Set_Default_Plot_Properties();
 
     nfiles = 100;
-    fprintf('Reading %i files\n',nfiles);
-
-    %%%
-    % Load data from NACA realizations
-    %%%
-    
-    path = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-            'ASEN_6519_Uncertainty_Quantification/Final_Project/data/low-fidelity/'];
-             
-    NACA_data = Load_NACA_Directory(path, 'wing', nfiles);
-    
-    %%%
-    % Sort points going around airfoil circumference
-    %%%
-    
-    params_file = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-                   'ASEN_6519_Uncertainty_Quantification/Final_Project/', ...
-                   'matlab/naca_params_posalpha.csv'];
-    
-	starting_run_number = 1000;
-	naca_params = csvread(params_file,1,0);
-    alpha_threshold = 7.0;
-    NACA_data = Sort_NACA_Data(naca_params, NACA_data, ...
-                               starting_run_number, alpha_threshold);
-                           
-	nfiles = length(NACA_data); % Some could have been filtered out by alpha_threshold.
-    fprintf('After removing alpha > %.2f, %i files remain\n',alpha_threshold,nfiles);
+    alpha_threshold = 0;
+    NACA_data = Load_Sorted_Data('LF-1000', nfiles, alpha_threshold);
 
     %%%
     % Plot stuff!

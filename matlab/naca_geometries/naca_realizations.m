@@ -35,7 +35,7 @@ function [ ] = naca_realizations()
     axis square;
     axis equal;
     
-    writetable(array2table(params, 'VariableNames', {'m','p','t','c','a'}), 'naca_params_posalpha2.csv');
+%     writetable(array2table(params, 'VariableNames', {'m','p','t','c','a'}), 'naca_params_smaller.csv');
     
     
     if false
