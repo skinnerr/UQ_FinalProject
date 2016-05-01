@@ -37,7 +37,7 @@ function [ NACA_data ] = Load_NACA_Directory( varargin )
     % Assert that inputs are strings.
     validateattributes(directory_path,    {'char'},{'nonempty'});
     validateattributes(file_filter_string,{'char'},{});
-    validateattributes(n_files,           {'numeric'},{'>',0});
+    validateattributes(n_files,           {'numeric'},{'>=',0});
     
     %%%
     % Obtain a list of all '.csv' files in the directory.

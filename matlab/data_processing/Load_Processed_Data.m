@@ -29,6 +29,10 @@ function [ NACA_data, NACA_stats ] = Load_Processed_Data( identifier_string, nfi
         fprintf('After removing alpha > %.2f, %i files remain\n',alpha_threshold,nfiles);
     end
     
+    if nfiles <= 0
+        nfiles = length(NACA_data);
+    end
+    
     x_avg  = zeros(length(NACA_data(1).xnorm),1);
     cp_max = NACA_data(1).cp;
     cp_min = cp_max;
