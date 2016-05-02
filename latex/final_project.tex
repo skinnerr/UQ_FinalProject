@@ -69,39 +69,9 @@ The present work seeks to quantify the effect of variability in geometric parame
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{figure}[b]
-\begin{center}
-\includegraphics[width=0.9\textwidth]{example_deformation.eps}
-\caption{Deforming a NACA 0012 airfoil ({\color{blue}blue}) to an arbitrary NACA 4-digit airfoil ({\color{red}red}). Point displacements indicated in black.}
-\label{fig:example_deformation}
-\end{center}
-\end{figure}
-
-For both the LF and HF runs, we begin by meshing the fluid volume around a standard NACA 0012 airfoil at zero angle of attack, the outline of which is shown in Figure \ref{fig:example_deformation}. This allows us to iterate the mesh until it adequately captures the airfoil's curvature.
-
-The converged flow solution on this NACA 0012 mesh acts as the starting point for each new combination of geometric parameters we want to test. Geometric parameters are specified in an ASCII input file. Upon reading this file, PHASTA applies a displacement to each node on the surface of the airfoil, represented by the black lines in Figure \ref{fig:example_deformation}. A linear elastic structural solver\footnote{Courtesy of Eric Peters, University of Colorado at Boulder} satisfies the displacement constraints and deforms the entire mesh in accordance with the specified geometric parameters, preserving positive volumes on boundary layer elements by enforcing an inverse relationship between element volume and stiffness. As before, numerical solution of the flow equations proceeds until statistically-steady results are again obtained, or until a given number of time steps have passed. LF simulations use the Spalart-Allmaras (SA) RANS model on a coarse grid.
-
-Each LF simulation uses randomly selected inputs (within the allowed range) for the geometric parameters. When the simulation's stopping criterion is met, $C_p$ and $C_L$ information is extracted from the solution, and stored with a geometric identifier specifying $m$, $p$, $t$, and $\alpha$. For a given set of runs, an interpolating decomposition (ID) is used to determine which geometries contribute most to the variation in performance characteristics (see Doostan et.~al. 2016).
-
-HF simulations are then run for only the select few geometric configurations with the largest ID coefficients. These HF simulations combine SA-RANS with large eddy simulation (LES) through dynamic detached-eddy simulation (DDES). Because they resolve unsteady shedding, the HF runs require time averaging, whereas the low-fidelity RANS simulations do not. The truncated ID is then used to reconstruct the solution quantities of interest: expansion coefficients from the ID of LF-origin are combined with their corresponding basis vectors, which now come from HF simulations.
-
-To verify the accuracy of the bi-fidelity approach, more HF simulations are run using geometric configurations not present in the truncated expansion. The HF simulation results are compared to those predicted by the truncated bi-fidelity expansion.
-
-\subsection{Mesh Deformation}
-
-Both coarse and fine meshes are created by extruding a mesh on the $+z$-face through the domain. Results are shown in Figures \ref{fig:mesh_coarse} and \ref{fig:mesh_fine}, respectively. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$ ($y^+_\tmax \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at 0.01 ($y^+_\tmax \sim 4 \times 10^4$) with the same gradation factor. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
-
 \subsection{Flow Simulation}
 
-Simulations are run in PHASTA, the parallel hierarchic adaptive stabilized transient analysis CFD code developed and maintained by Prof. Kenneth Jansen's group at the University of Colorado at Boulder. The compressible branch is used solely to carry out the mesh deformation, and the incompressible branch is used to actually run the simulation. The lack of PETSc integration in the incompressible formulation necessitated this non-streamlined workflow.
-
-A schematic of the computational fluid domain is shown in Figure \ref{fig:domain}. It has streamwise length $L = 60$~m, vertical height $H = 10$~m, and span-wise width $W = 0.01$~m. These dimensions correspond to Cartesian directions $x$, $y$, and $z$.
-
-Simulations are incompressible, target a Reynolds number of 3 million with respect to the airfoil chord, and use the Spalart-Allmaras (SA) RANS turbulence closure. The fluid has a density of $\rho = 1.0$~kg/m$^3$ and a kinematic viscosity of $4.0 \times 10^{-5}$~m$^2$/s. It enters the domain from the $-x$ face with a velocity of $120$~m/s in the $+x$-direction. The airfoil's leading edge is located at $(0,0)$, and has no-slip boundary conditions applied. All faces have an essential temperature BC set to $273.15$~K, except for the $\pm z$ sidewalls and $+x$ outflow, which set natural temperature flux to zero. The outflow's essential pressure is set to $1\times 10^{5}$~Pa. The $\pm y$ and $\pm z$ walls are inviscid and impenetrable.
-
-To seek a steady solution, both LF and HF simulations are run at a fairly large time step of $\Delta t = 1 \times 10^{-2}$~s with first-order time integration until negligible solution change is observed between iterations, and the flow and scalar (eddy viscosity) solve absolute errors drop below $2 \times 10^{-3}$ and $2 \times 10^{-5}$, respectively.
-
-\begin{figure}[t]
+\begin{figure}[b]
 \begin{center}
 \begin{overpic}[width=\textwidth]{domain_grid.png}
 	\put (3, 13.5) {\small \parbox[t][2in][t]{2in}{\emph{Inflow}\\
@@ -127,6 +97,30 @@ To seek a steady solution, both LF and HF simulations are run at a fairly large 
 \\[1.5ex]
 \caption{Schematic of computational domain with BCs listed. Spatial units in meters.}
 \label{fig:domain}
+\end{center}
+\end{figure}
+
+Simulations are run in PHASTA, the parallel hierarchic adaptive stabilized transient analysis CFD code developed and maintained by Prof. Kenneth Jansen's group at the University of Colorado at Boulder. The compressible branch is used solely to carry out the mesh deformation, and the incompressible branch is used to actually run the simulation. The lack of PETSc integration in the incompressible formulation necessitates this workflow.
+
+A schematic of the computational fluid domain is shown in Figure \ref{fig:domain}. It has streamwise length $L = 60$~m, vertical height $H = 10$~m, and span-wise width $W = 0.01$~m. These dimensions correspond to Cartesian directions $x$, $y$, and $z$. The airfoil's chord is $1.0$~m, and its leading edge is located $15$~m upstream from the inflow and equidistant from the top and bottom walls.
+
+Simulations are incompressible, target a Reynolds number of 3 million with respect to the airfoil chord, and use the Spalart-Allmaras (SA) RANS turbulence closure. The fluid has a density of $\rho = 1.0$~kg/m$^3$ and a kinematic viscosity of $4.0 \times 10^{-5}$~m$^2$/s. It enters the domain from the $-x$ face with a velocity of $120$~m/s in the $+x$-direction. The airfoil has no-slip boundary conditions applied. All faces have an essential temperature BC set to $273.15$~K, except for the $\pm z$ sidewalls and $+x$ outflow, which set natural temperature flux to zero. The outflow's essential pressure is set to $1\times 10^{5}$~Pa. The $\pm y$ and $\pm z$ walls are inviscid and impenetrable.
+
+To seek a steady solution, both LF and HF simulations are run at a fairly large time step of $\Delta t = 1 \times 10^{-2}$~s with first-order time integration until negligible solution change is observed between iterations, and the flow and scalar (eddy viscosity) solve absolute errors drop below $2 \times 10^{-3}$ and $2 \times 10^{-5}$, respectively.
+
+\subsection{Mesh Generation and Deformation}
+
+The only distinguishing factor between the low- (LF) and high-fidelity (HF) runs is the mesh resolution; they use the following ``coarse'' and ``fine'' meshes, respectively.
+
+For both the LF and HF runs, we begin by meshing the fluid volume around a standard NACA 0012 airfoil at zero angle of attack, the outline of which is shown in Figure \ref{fig:example_deformation}. This allows us to iterate the mesh until it adequately captures the airfoil's curvature.
+
+Both coarse and fine meshes are created by extruding a mesh on the $+z$-face through the domain. Results are shown in Figures \ref{fig:mesh_coarse} and \ref{fig:mesh_fine}, respectively. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$~m ($y^+_\tmax \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at $0.01$~m ($y^+_\tmax \sim 4 \times 10^4$) with the same gradation factor. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
+
+\begin{figure}[b]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{example_deformation.eps}
+\caption{Deforming a NACA 0012 airfoil ({\color{blue}blue}) to an arbitrary NACA 4-digit airfoil ({\color{red}red}). Point displacements indicated in black.}
+\label{fig:example_deformation}
 \end{center}
 \end{figure}
 
@@ -159,6 +153,24 @@ To seek a steady solution, both LF and HF simulations are run at a fairly large 
 \label{fig:mesh_coarse}
 \end{center}
 \end{figure}
+
+The converged NACA 0012 flow solution acts as the starting point for each new combination of geometric parameters we want to test. Geometric parameters are specified in an ASCII input file. Upon reading this file, PHASTA applies a displacement to each node on the surface of the airfoil, represented by the black lines in Figure \ref{fig:example_deformation}. A linear elastic structural solver\footnote{Courtesy of Eric Peters, University of Colorado at Boulder} satisfies the displacement constraints and deforms the entire mesh in accordance with the specified geometric parameters. Positive volumes on boundary layer elements are preserved by enforcing an inverse relationship between element volume and stiffness. As before, numerical solution of the flow equations proceeds until statistically-steady results are again obtained.
+
+Each simulation uses randomly selected inputs within the allowed range for the geometric parameters, as specified in Table \ref{tbl:rand_params}. When the simulation's stopping criterion is met, $C_p$ information is extracted from the solution file through a ParaView script, and stored with an identifier linking the run to its geometric parameters.
+
+For a given study of random parameter distributions, 1000 LF and 1000 HF runs are carried out. An interpolating decomposition (ID) is generated from the LF runs, and is used to determine which geometries contribute most to the variation in $C_p$ (see Doostan et.~al. 2016). A truncated ID including only the largest coefficients is then used to reconstruct the solution quantities of interest. Expansion coefficients from the ID of LF-origin are combined with their corresponding basis vectors, which now come from HF simulations.
+
+\begin{table}[h]
+\begin{center}
+TABLE TABLE TABLE
+\end{center}
+\caption{Geometric parameters used in each of the three studies.}
+\label{tbl:rand_params}
+\end{table}
+
+HF simulations are then run for only the select few geometric configurations with the largest ID coefficients. These HF simulations combine SA-RANS with large eddy simulation (LES) through dynamic detached-eddy simulation (DDES). Because they resolve unsteady shedding, the HF runs require time averaging, whereas the low-fidelity RANS simulations do not. The truncated ID is then used to reconstruct the solution quantities of interest: expansion coefficients from the ID of LF-origin are combined with their corresponding basis vectors, which now come from HF simulations.
+
+To verify the accuracy of the bi-fidelity approach, more HF simulations are run using geometric configurations not present in the truncated expansion. The HF simulation results are compared to those predicted by the truncated bi-fidelity expansion.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
