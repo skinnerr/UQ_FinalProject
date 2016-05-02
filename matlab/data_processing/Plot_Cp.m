@@ -36,14 +36,13 @@ function [] = Plot_Cp()
     % Perform ID and bi-fidelity modeling
     [P,ix] = matrixID(UL,tol^2); % P is the coefficient matrix and ix is the basis index
     
-    % Truncate the expansion
-    fraction_to_keep = 1;
+    % Truncate the expansion and compute reduced-order models
+    fraction_to_keep = 0.5;
     cutoff = round(length(ix)*fraction_to_keep);
-    ix = ix(1:cutoff);
-    
-    % Compute reduced-order models
-    UL_id = UL(:,ix) * P(1:cutoff,:);
-    UH_id = UH(:,ix) * P(1:cutoff,:);
+    ULix = UL(:,ix);
+    UHix = UH(:,ix);
+    UL_id = ULix(:,1:cutoff) * P(1:cutoff,:);
+    UH_id = UHix(:,1:cutoff) * P(1:cutoff,:);
     
     % Compute errors.
     err_id_L = norm(UL - UL_id,'fro')/norm(UL,'fro');
