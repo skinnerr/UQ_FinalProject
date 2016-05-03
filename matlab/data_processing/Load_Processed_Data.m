@@ -2,21 +2,36 @@ function [ NACA_data, NACA_stats ] = Load_Processed_Data( identifier_string, nfi
                                                           alpha_threshold )
 
     fprintf('Reading %i files from %s\n',nfiles,identifier_string);
+    
+    main_data_dir = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
+                    'ASEN_6519_Uncertainty_Quantification/Final_Project/data/'];
 
-    if strcmp(identifier_string, 'LF-1000') || strcmp(identifier_string, 'HF-1000')
+    if strcmp(identifier_string, 'original-LF') || strcmp(identifier_string, 'original-HF')
         starting_run_number = 1000;
-        params_file = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-                       'ASEN_6519_Uncertainty_Quantification/Final_Project/', ...
-                       'matlab/naca_params_posalpha.csv'];
-        if strcmp(identifier_string, 'LF-1000')
-            path = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-                    'ASEN_6519_Uncertainty_Quantification/Final_Project/', ...
-                    'data/low-fidelity/'];
-        elseif strcmp(identifier_string, 'HF-1000')
-            path = ['/home/ryan/Documents/CU_Boulder/Year_2_2015-2016/', ...
-                    'ASEN_6519_Uncertainty_Quantification/Final_Project/', ...
-                    'data/high-fidelity/'];     
+        params_file = [main_data_dir, 'naca_params_posalpha.csv'];
+        if strcmp(identifier_string, 'original-LF')
+            path = [main_data_dir, 'original-lf/'];
+        elseif strcmp(identifier_string, 'original-HF')
+            path = [main_data_dir, 'original-hf/'];
+        end
+    elseif strcmp(identifier_string, 'attack-LF') || strcmp(identifier_string, 'attack-HF')
+        starting_run_number = 0;
+        params_file = [main_data_dir, 'naca_params_4412alphaneg2to2.csv'];
+        if strcmp(identifier_string, 'attack-LF')
+            path = [main_data_dir, 'attack-lf/'];
+        elseif strcmp(identifier_string, 'attack-HF')
+            path = [main_data_dir, 'attack-hf/'];
+        end
+    elseif strcmp(identifier_string, 'geometry-LF') || strcmp(identifier_string, 'geometry-HF')
+        starting_run_number = 0;
+        params_file = [main_data_dir, 'naca_params_4412at5percentgeomerr.csv'];
+        if strcmp(identifier_string, 'geometry-LF')
+            path = [main_data_dir, 'geometry-lf/'];
+        elseif strcmp(identifier_string, 'geometry-HF')
+            path = [main_data_dir, 'geometry-lf/'];
         end 
+    else
+        error('String "%s" not recognized',identifier_string);
     end
 
     NACA_params = csvread(params_file,1,0);

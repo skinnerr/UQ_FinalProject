@@ -4,8 +4,12 @@ function [] = Plot_Cp()
 
     nfiles = 100;
     alpha_threshold = 0;
-    [NdatL, NstatL] = Load_Processed_Data('LF-1000', nfiles, alpha_threshold);
-    [NdatH, NstatH] = Load_Processed_Data('HF-1000', nfiles, alpha_threshold);
+%     [NdatL, NstatL] = Load_Processed_Data('original-LF', nfiles, alpha_threshold);
+%     [NdatH, NstatH] = Load_Processed_Data('original-HF', nfiles, alpha_threshold);
+%     [NdatL, NstatL] = Load_Processed_Data('geometry-LF', nfiles, alpha_threshold);
+%     [NdatH, NstatH] = Load_Processed_Data('geometry-HF', nfiles, alpha_threshold);
+    [NdatL, NstatL] = Load_Processed_Data('attack-LF', nfiles, alpha_threshold);
+    [NdatH, NstatH] = Load_Processed_Data('attack-HF', nfiles, alpha_threshold);
 
     %%%
     % Compute ID and calculate bi-fiedlity model
@@ -30,6 +34,7 @@ function [] = Plot_Cp()
     Sdiag = diag(S(1:r,1:r))/S(1,1);
 
     % plot the singular values of U_c just to see the rank
+    figure();
     semilogy(Sdiag,'ro')
     title('Singular Values of U_L')
 
