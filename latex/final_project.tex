@@ -9,7 +9,7 @@
 \begin{document}
 \fancypagestyle{allpages}
 {
-	\fancyhf[LH]{}
+	\fancyhf[LH]{Bi-Fidelity Modeling of a NACA Airfoil}
 	\fancyhf[CH]{}
 	\fancyhf[RH]{\thepage}
 	\fancyhf[LF]{}
@@ -42,10 +42,9 @@ Ryan Skinner$^1$
 \normalsize
 $^1$University of Colorado, Boulder, CO USA
 \end{center}
-\vspace*{0.3in}
 
 \section*{Abstract}
-This bi-fidelity investigation explores the effect of variation in geometry and angle of attack on the performance of a 2-D NACA 4412 airfoil. The flow is incompressible and is characterized by a Reynolds number of 3 million. All simulations rely on the steady Spalart-Allmaras (SA) RANS turbulence closure. Low-fidelity simulations use a coarse mesh with unresolved boundary layers (BLs), whereas high-fidelity simulations employ a refined mesh that fully resolves the near-wall BL. Predictive capacity of the bi-fidelity approach is analysed with pressure coefficient data.
+This bi-fidelity investigation explores the effect of variation in geometry and angle of attack on the performance of a 2-D NACA 4412 airfoil. The flow is incompressible and is characterized by a Reynolds number of 3 million. All simulations are steady and rely on the Spalart-Allmaras (SA) RANS turbulence closure. Low-fidelity simulations use a coarse mesh with unresolved boundary layers (BLs), whereas high-fidelity simulations employ a refined mesh that fully resolves the near-wall BL. Predictive capacity of the bi-fidelity approach is analysed with pressure coefficient data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,15 +52,11 @@ This bi-fidelity investigation explores the effect of variation in geometry and 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The need to characterize and optimize the design of unsteady aerodynamic systems becomes more pressing as atmospheric vehicles push performance boundaries. Despite advances over the last five decades in turbulence modeling, accurately capturing the relevant dynamics is prohibitively expensive in the context of uncertainty quantification (UQ) and design optimization (DO). The finite time to market for most high-performance aerospace products constrains simulations' quantity and rigor, and can lead to uncertain and sub-optimal performance. Any method that ameliorates this problem is directly applicable to industry.
+The need to characterize and optimize the design of unsteady aerodynamic systems becomes more pressing as atmospheric vehicles push performance boundaries. Despite advances over the last five decades in turbulence modeling, accurately capturing the dynamics critical to these systems is computationally expensive. In most cases, this expense precludes thorough uncertainty quantification (UQ) and design optimization (DO) of the system. Accordingly, the finite time to market for most high-performance aerospace products constrains simulations' quantity and rigor, and can lead to uncertain and sub-optimal performance. Any method that ameliorates this problem is directly applicable to industry.
 
 The bi-fidelity approach seeks to address the shortcomings of traditional brute-force UQ/DO strategies. Bi-fidelity modeling has two steps. First, a number of low-fidelity (LF) simulations are run. LF simulations do not capture the exact physics of the system, but place low demand on computational resources. These LF realizations are used to generate both an interpolation and a low-rank approximation of a solution quantity as a function of design parameters. For aerodynamics, LF simulations may employ less stringent numerical convergence criteria, coarser meshes, or less-accurate turbulence models. Second, high-fidelity (HF) simulations are run for each combination of parameters deemed important by the low-rank approximation. HF simulations are ideally as accurate as possible, addressing all shortcomings of the LF model. The HF results are used in conjunction with the low-fidelity interpolating coefficients to approximate the solution response over the parameter space.
 
-Though 2-D NACA airfoils command little topical interest, this family is nonetheless selected for two reasons. First, it is a standard academic geometry that was thoroughly studied in the 1930s and '40s, resulting in readily-available validation data (see NACA reports 563, 613, and 824). Second, applying the bi-fidelity approach to a NACA airfoil offers a proving ground for the method and analysis tools, which can be scaled up to more industrially-relevant systems in future work. Ultimately, this technology will expanded to multi-fidelity simulations of flow over complex engineering geometries, such as a multi-element airfoil at high angle of attack or active flow control in an aggressive subsonic diffuser.
-
-\subsection{Problem Statement}
-
-The present work seeks to quantify the effect of variability in geometric parameters defining a NACA 4-digit series airfoil on the $C_p$ distribution across its surface. Specifically, we consider maximum camber $m$, location of maximum camber $p$, maximum thickness $t$, and angle of attack $\alpha$. All but $\alpha$ are specified as a fraction of the chord $c$, which we take to be unity.
+The present work seeks to quantify the effect of variability in geometric parameters defining a NACA 4-digit series airfoil on the $C_p$ distribution across its surface. Though 2-D NACA airfoils command little topical interest, this family is nonetheless selected for two reasons. First, it is a standard academic geometry that was thoroughly studied in the 1930s and '40s, resulting in readily-available validation data \citeme. Second, applying the bi-fidelity approach to a NACA airfoil offers a proving ground for the method and analysis tools, which can be scaled up to more industrially-relevant systems in future work. Ultimately, this technology will be extended to multi-fidelity simulations of flow over complex engineering geometries characterized by highly-unsteady separation. Such examples could include a multi-element airfoil at high-$\alpha$ or active flow control in an aggressive subsonic diffuser.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,9 +64,55 @@ The present work seeks to quantify the effect of variability in geometric parame
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Flow Simulation}
+\subsection{NACA 4-Digit Airfoils}
+
+Before discussing simulation and bi-fidelity modeling details, it is fitting to quantify the geometry under study. The shape of a NACA 4-digit airfoil is defined by its maximum camber $m$, location of maximum camber $p$, maximum thickness $t$. These are non-dimensionalized by the airfoil chord $c$, which we take to be unity. We also consider the angle of attack $\alpha$ as a geometric parameter.
 
 \begin{figure}[b]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{example_deformation.eps}
+\\[1ex]
+\caption{Deforming a NACA 0012 airfoil ({\color{red}red}) to an arbitrary NACA 4-digit airfoil ({\color{blue}blue}). Point displacements indicated in black.}
+\label{fig:naca_deform}
+\end{center}
+\end{figure}
+
+The thickness of a symmetric airfoil corresponding to the NACA 00xx series is given by
+\begin{equation}
+y_t = 5tc\, \left[ 0.2969 \sqrt{\frac{x}{c}} + (-0.1260) \left(\frac{x}{c}\right) + (-0.3516) \left(\frac{x}{c}\right)^2 + 0.2843 \left(\frac{x}{c}\right)^3 + (-0.1015) \left( \frac{x}{c} \right)^4 \right]
+\end{equation}
+where $x \in [0, c]$ is a physical coordinate in the stream-wise direction. The coordinate pairs of points on the upper $(x_U, y_U)$ and lower $(x_L, y_L)$ surfaces are simply $x_U = x_L = x$, $y_U = y_t$, and $y_L = -y_t$. An example of the NACA 0012 airfoil is shown in Figure \ref{fig:naca_deform}.
+
+Cambered NACA airfoils define thickness perpendicular to the camber line, which is given by
+\begin{equation}
+y_c = \begin{cases}
+m \frac{x}{p^2} \left( 2p-\frac{x}{c}\right) & 0 \le x \le pc \\
+m \frac{c-x}{(1-p)^2} \left(1-2p+\frac{x}{c}\right) & pc \le x \le c
+\end{cases}
+\end{equation}
+Accounting for camber, the upper and lower coordinate pairs become
+\begin{equation}
+\begin{aligned}
+x_U &= x - y_t \sin \theta &\quad y_U &= y_c + y_t \cos \theta \\
+x_L &= x + y_t \sin \theta &\quad y_L &= y_c - y_t \cos \theta
+\end{aligned}
+\end{equation}
+where
+\begin{equation}
+\theta = \arctan \left( \dd{y_c}{x} \right)
+\quad \text{and} \quad
+\dd{y_c}{x} =
+\begin{cases}
+\frac{2m}{p^2} \left( p - \frac{x}{c} \right) & 0 \le x \le pc \\
+\frac{2m}{(1-p)^2} \left( p - \frac{x}{c} \right) & pc \le x \le c
+\end{cases}
+\end{equation}
+
+Because cambered profiles are generated from their symmetric counterparts, we can analytically determine the displacements necessary to deform any volume (in our case, that around a NACA 0012 airfoil) into an arbitrary 4-digit NACA mesh. Figure \ref{fig:naca_deform} illustrates this concept. As will be explained later, this ability results in substantial efficiency gains when running multiple simulations of different geometries.
+
+\subsection{Flow Simulation}
+
+\begin{figure}[t]
 \begin{center}
 \begin{overpic}[width=\textwidth]{domain_grid.png}
 	\put (3, 13.5) {\small \parbox[t][2in][t]{2in}{\emph{Inflow}\\
@@ -100,77 +141,128 @@ The present work seeks to quantify the effect of variability in geometric parame
 \end{center}
 \end{figure}
 
-Simulations are run in PHASTA, the parallel hierarchic adaptive stabilized transient analysis CFD code developed and maintained by Prof. Kenneth Jansen's group at the University of Colorado at Boulder. The compressible branch is used solely to carry out the mesh deformation, and the incompressible branch is used to actually run the simulation. The lack of PETSc integration in the incompressible formulation necessitates this workflow.
+Simulations are run in PHASTA, the parallel hierarchic adaptive stabilized transient analysis CFD code developed and maintained by Prof. Kenneth Jansen's group at the University of Colorado at Boulder. The compressible branch is used solely to carry out the mesh deformation, and the incompressible branch is used to actually run the simulation. The lack of PETSc integration in the incompressible formulation necessitates this somewhat disjointed workflow.
 
-A schematic of the computational fluid domain is shown in Figure \ref{fig:domain}. It has streamwise length $L = 60$~m, vertical height $H = 10$~m, and span-wise width $W = 0.01$~m. These dimensions correspond to Cartesian directions $x$, $y$, and $z$. The airfoil's chord is $1.0$~m, and its leading edge is located $15$~m upstream from the inflow and equidistant from the top and bottom walls.
+A schematic of the computational fluid domain is shown in Figure \ref{fig:domain}. It has streamwise length $L = 60$~m, vertical height $H = 10$~m, and span-wise width $W = 0.01$~m. These dimensions correspond to Cartesian directions $x$, $y$, and $z$ respectively. The airfoil's chord is $1.0$~m, and its leading edge is located $15$~m upstream from the inflow and equidistant from the top and bottom walls.
 
-Simulations are incompressible, target a Reynolds number of 3 million with respect to the airfoil chord, and use the Spalart-Allmaras (SA) RANS turbulence closure. The fluid has a density of $\rho = 1.0$~kg/m$^3$ and a kinematic viscosity of $4.0 \times 10^{-5}$~m$^2$/s. It enters the domain from the $-x$ face with a velocity of $120$~m/s in the $+x$-direction. The airfoil has no-slip boundary conditions applied. All faces have an essential temperature BC set to $273.15$~K, except for the $\pm z$ sidewalls and $+x$ outflow, which set natural temperature flux to zero. The outflow's essential pressure is set to $1\times 10^{5}$~Pa. The $\pm y$ and $\pm z$ walls are inviscid and impenetrable.
+Simulations are incompressible, target a Reynolds number of 3 million with respect to the airfoil chord, and use the Spalart-Allmaras (SA) RANS turbulence closure. The fluid has a density of $\rho = 1.0$~kg/m$^3$ and a kinematic viscosity of $4.0 \times 10^{-5}$~m$^2$/s. Fluid enters the domain from the $-x$ face with a velocity of $120$~m/s in the $+x$-direction. The airfoil has no-slip boundary conditions applied. All faces have an essential temperature BC set to $273.15$~K, except for the $\pm z$ sidewalls and $+x$ outflow, which set natural temperature flux to zero. The outflow's essential pressure is set to $1\times 10^{5}$~Pa. The $\pm y$ and $\pm z$ walls are inviscid and impenetrable.
 
-To seek a steady solution, both LF and HF simulations are run at a fairly large time step of $\Delta t = 1 \times 10^{-2}$~s with first-order time integration until negligible solution change is observed between iterations, and the flow and scalar (eddy viscosity) solve absolute errors drop below $2 \times 10^{-3}$ and $2 \times 10^{-5}$, respectively.
+To seek a steady solution, both LF and HF simulations are run at a fairly large time step of $\Delta t = 1 \times 10^{-2}$~s with first-order time integration until negligible solution change is observed between iterations, and the flow and SA turbulence scalar absolute errors drop below $2 \times 10^{-3}$ and $2 \times 10^{-5}$, respectively. Meeting this criterion typically requires between 30 and 50 time steps.
 
-\subsection{Mesh Generation and Deformation}
+\subsection{Mesh Generation}
 
-The only distinguishing factor between the low- (LF) and high-fidelity (HF) runs is the mesh resolution; they use the following ``coarse'' and ``fine'' meshes, respectively.
+For both the LF and HF runs, we begin by meshing the fluid volume around a standard NACA 0012 airfoil at zero angle of attack, the outline of which is shown in Figure \ref{fig:naca_deform}. This allows us to iterate the mesh until it adequately captures the curvature of this family of airfoils. The only distinguishing factor between the low- (LF) and high-fidelity (HF) runs is the mesh resolution; they use the following ``coarse'' and ``fine'' meshes, respectively.
 
-For both the LF and HF runs, we begin by meshing the fluid volume around a standard NACA 0012 airfoil at zero angle of attack, the outline of which is shown in Figure \ref{fig:example_deformation}. This allows us to iterate the mesh until it adequately captures the airfoil's curvature.
+Both coarse and fine meshes are created by extruding a mesh on the $+z$-face in the -$z$-direction through the domain, and then tetrahedronizing the entire mesh. Results of meshing are shown in Figure \ref{fig:mesh_coarse}. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, whereas the fine mesh does, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$~m ($y^+_\tmin \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at $0.01$~m ($y^+_\tmin \sim 4 \times 10^4$) with the same gradation factor. The fine BL mesh conforms to recommendations by Spalart \citeme. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
 
-Both coarse and fine meshes are created by extruding a mesh on the $+z$-face through the domain. Results are shown in Figures \ref{fig:mesh_coarse} and \ref{fig:mesh_fine}, respectively. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$~m ($y^+_\tmax \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at $0.01$~m ($y^+_\tmax \sim 4 \times 10^4$) with the same gradation factor. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
-
-\begin{figure}[b]
+\begin{figure}[t]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{example_deformation.eps}
-\caption{Deforming a NACA 0012 airfoil ({\color{blue}blue}) to an arbitrary NACA 4-digit airfoil ({\color{red}red}). Point displacements indicated in black.}
-\label{fig:example_deformation}
-\end{center}
-\end{figure}
-
-\begin{figure}[hb]
-\begin{center}
-\includegraphics[width=0.9\textwidth,trim={0 377px 0 377px},clip]{mesh_32k_1.png}
-\\[1.5ex]
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_32k_2.png}
-\hspace*{1ex}
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_32k_3.png}
-\hspace*{1ex}
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_32k_4.png}
-\\[1.5ex]
-\caption{``Coarse'' 2-D mesh of fluid domain around a NACA 4412 airfoil, containing approximately 5,500 tetrahedral elements. Counter-clockwise from top: zooming in from full domain to trailing edge of airfoil.}
-\label{fig:mesh_fine}
-\end{center}
-\end{figure}
-
-\begin{figure}[hb]
-\begin{center}
-\includegraphics[width=0.9\textwidth,trim={0 377px 0 377px},clip]{mesh_5p5k_1.png}
-\\[1.5ex]
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_2.png}
-\hspace*{1ex}
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_3.png}
-\hspace*{1ex}
-\includegraphics[width=0.30\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_4.png}
-\\[1.5ex]
-\caption{``Fine'' mesh equivalent of Figure \ref{fig:mesh_fine}, containing approximately 32,000 tetrahedral elements.}
+\begin{overpic}[width=0.4\textwidth,trim={0 377px 0 377px},clip]{mesh_5p5k_1.png}
+	\put (0,19) {Coarse: 5,500 tetrahedral elements}
+\end{overpic}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_2.png}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_3.png}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_5p5k_4.png}
+\\[3mm]
+\begin{overpic}[width=0.4\textwidth,trim={0 377px 0 377px},clip]{mesh_32k_1.png}
+	\put (0,19) {Fine: 32,000 tetrahedral elements}
+\end{overpic}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_32k_2.png}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_32k_3.png}
+\hspace*{1mm}
+\includegraphics[width=0.18\textwidth,trim={0 0 0 0},clip]{mesh_32k_4.png}
+\\[2ex]
+\caption{Coarse (top) and fine (bottom) 2-D mesh of fluid domain around a NACA 4412 airfoil. Left to right: zooming in from full domain to trailing edge of airfoil. Note the lack of shear layer and near-wall resolution on coarse mesh.}
 \label{fig:mesh_coarse}
 \end{center}
 \end{figure}
 
-The converged NACA 0012 flow solution acts as the starting point for each new combination of geometric parameters we want to test. Geometric parameters are specified in an ASCII input file. Upon reading this file, PHASTA applies a displacement to each node on the surface of the airfoil, represented by the black lines in Figure \ref{fig:example_deformation}. A linear elastic structural solver\footnote{Courtesy of Eric Peters, University of Colorado at Boulder} satisfies the displacement constraints and deforms the entire mesh in accordance with the specified geometric parameters. Positive volumes on boundary layer elements are preserved by enforcing an inverse relationship between element volume and stiffness. As before, numerical solution of the flow equations proceeds until statistically-steady results are again obtained.
+The converged NACA 0012 flow solution acts as the starting point for each new combination of geometric parameters we want to test. This means we skip the start-up transient of ``turning on'' the simulated wind tunnel for subsequent geometries, resulting in efficiency gains. Geometric parameters are specified in an ASCII input file. Upon reading this file, PHASTA applies a displacement to each node on the surface of the airfoil, represented by the black lines in Figure \ref{fig:naca_deform}. A linear elastic structural solver\footnote{Courtesy of Eric Peters, University of Colorado at Boulder} satisfies the displacement constraints and deforms the entire mesh in accordance with the specified geometric parameters. Positive volumes on BL elements are preserved by enforcing an inverse relationship between element volume and stiffness. As before, numerical solution of the flow equations proceeds until statistically-steady results are obtained.
 
-Each simulation uses randomly selected inputs within the allowed range for the geometric parameters, as specified in Table \ref{tbl:rand_params}. When the simulation's stopping criterion is met, $C_p$ information is extracted from the solution file through a ParaView script, and stored with an identifier linking the run to its geometric parameters.
+\subsection{Interpolating Decomposition and Runs Conducted}
 
-For a given study of random parameter distributions, 1000 LF and 1000 HF runs are carried out. An interpolating decomposition (ID) is generated from the LF runs, and is used to determine which geometries contribute most to the variation in $C_p$ (see Doostan et.~al. 2016). A truncated ID including only the largest coefficients is then used to reconstruct the solution quantities of interest. Expansion coefficients from the ID of LF-origin are combined with their corresponding basis vectors, which now come from HF simulations.
+Three sets of random geometric parameters used, corresponding to cases 1, 2, and 3 in Table \ref{tbl:rand_params}. For a given case, we represent them as the stochastic vector 
+\begin{equation}
+\bm{y} = \begin{bmatrix}
+\bm{m} & \bm{p} & \bm{t} & \bm{c} & \bm{\alpha}
+\end{bmatrix}^T
+\end{equation}
+When an individual run meets the stopping criterion described above, $C_p$ information is extracted from the solution file through a ParaView script, and stored with an identifier linking the run to its specific realization of geometric parameters.
 
-\begin{table}[h]
+\begin{table}[t]
 \begin{center}
-TABLE TABLE TABLE
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Case & $\bm{m}$ & $\bm{p}$ & $\bm{t}$ & $\bm{c}$ & $\bm{\alpha}$ \\
+\midrule
+1 & $U[0,0.1]$ & $U[0.3,0.6]$ & $U[0.05,0.2]$ & $1.0$ & $U[0,7]$ \\
+2 & $U[0.045,0.055]$ & $U[0.3825,0.5175]$ & $U[0.1156,0.1344]$ & $1.0$ & $U[0,7]$ \\
+3 & $0.04$ & $0.4$ & $0.12$ & $1.0$ & $U[-2,2]$ \\
+\bottomrule
+\end{tabular}
 \end{center}
-\caption{Geometric parameters used in each of the three studies.}
+\caption{Geometric random variables used in each of the three cases. (1) arbitrary ranges for initial study, (2) arbitrarily defined ``manufacturing error'' for geometric parameters at variable $\bm{\alpha}$, (3) NACA 4412 airfoil with small variation in $\bm{\alpha}$ to crudely model atmospheric turbulence.}
 \label{tbl:rand_params}
 \end{table}
 
-HF simulations are then run for only the select few geometric configurations with the largest ID coefficients. These HF simulations combine SA-RANS with large eddy simulation (LES) through dynamic detached-eddy simulation (DDES). Because they resolve unsteady shedding, the HF runs require time averaging, whereas the low-fidelity RANS simulations do not. The truncated ID is then used to reconstruct the solution quantities of interest: expansion coefficients from the ID of LF-origin are combined with their corresponding basis vectors, which now come from HF simulations.
+Each realization of random parameters is denoted by $\bm{y}^{(i)}$, where $i = 1, \dots, K$. The values of $C_p$ at all $m$ points on the airfoil surface are collected in a solution vector $\bm{u}(\bm{y}^{(i)})$ for each geometric realization $i$. LF and HF solutions are denoted by a superscript, respectively $\bm{u}^L(\bm{y}^{(i)})$ and $\bm{u}^H(\bm{y}^{(i)})$.
 
-To verify the accuracy of the bi-fidelity approach, more HF simulations are run using geometric configurations not present in the truncated expansion. The HF simulation results are compared to those predicted by the truncated bi-fidelity expansion.
+The set of $K$ LF solutions are collected into a matrix
+\begin{equation}
+\bm{U}^L
+\equiv
+\begin{bmatrix}
+\vline & \vline & & \vline \\
+\bm{u}^L(\bm{y}^{(1)}) & \bm{u}^L(\bm{y}^{(2)}) & \cdots & \bm{u}^L(\bm{y}^{(K)}) \\
+\vline & \vline & & \vline
+\end{bmatrix}_{m \times K}
+\end{equation}
+where each column holds a single LF solution vector. An interpolating decomposition \citeme (ID) constructs a rank-$r$ approximation to $\bm{U}^L$ as the product of a column skeleton matrix $\bm{U}^L_C$ and the coefficient matrix $\bm{\Lambda}^L$.
+\begin{equation}
+\begin{aligned}
+\bm{U}^L
+&\approx
+\begin{bmatrix}
+\vline & \vline & & \vline \\
+\bm{u}^L(\bm{y}^{(1)}) & \bm{u}^L(\bm{y}^{(2)}) & \cdots & \bm{u}^L(\bm{y}^{(r)}) \\
+\vline & \vline & & \vline
+\end{bmatrix}_{m \times r}
+\begin{bmatrix}
+\lambda^L_{ij}
+\end{bmatrix}_{r \times K}
+\\
+&= \bm{U}^L_C \bm{\Lambda}^L
+\end{aligned}
+\end{equation}
+It is important to note that the $r \ll K$ basis vectors selected to decompose the full-rank $\bm{U}^L$ matrix are taken from that matrix itself. Thus, the columns of $\bm{U}^L_C$ correspond to specific realizations of $\bm{y}$. Furthermore, the decomposition rank $r$ is not fixed; it can be varied depending on the desired accuracy of the ID.
+
+To compute the bi-fidelity model, we first obtain high-fidelity solutions corresponding the geometric realizations deemed important by the LF ID. These populate a HF column skeleton $\bm{U}^H_C$. Then we reverse the ID to calculate our approximation $\hat{\bm{U}}^H$ of $K$ HF solutions,
+\begin{equation}
+\begin{aligned}
+\hat{\bm{U}}^H
+&=
+\begin{bmatrix}
+\vline & \vline & & \vline \\
+\bm{u}^H(\bm{y}^{(1)}) & \bm{u}^H(\bm{y}^{(2)}) & \cdots & \bm{u}^H(\bm{y}^{(r)}) \\
+\vline & \vline & & \vline
+\end{bmatrix}_{m \times r}
+\begin{bmatrix}
+\lambda^L_{ij}
+\end{bmatrix}_{r \times K}
+\\
+&= \bm{U}^H_C \bm{\Lambda}^L
+\end{aligned}
+\end{equation}
+
+For each case in Table \ref{tbl:rand_params}, $K=1000$ LF and 1000 HF runs are conducted. The ID and corresponding bi-fidelity model are both computed for different $r$. The ID and bi-fidelity model's error relative to the LF and HF runs, respectively, are computed using the Frobenius matrix norm,
+\begin{equation}
+\| \bm{M} \|_\text{Fro} \equiv \sqrt{\sum_i \sum_j M_{ij}^2}
+\end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -178,47 +270,9 @@ To verify the accuracy of the bi-fidelity approach, more HF simulations are run 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The shape of a 4-digit NACA xyzz airfoil is specified by three geometric parameters, all non-dimensionalized with respect to the chord length $c$:
-\begin{itemize}
-\item $m = \text{x} / 100$ is the maximum camber
-\item $p = \text{y} / 10$ is the location of maximum camber
-\item $t = \text{zz}/100$ is the maximum thickness
-\end{itemize}
-
-For a physical coordinate $x \in [0, c]$, the thickness of a symmetric airfoil is given by
-\begin{equation}
-y_t = 5tc\, \left[ 0.2969 \sqrt{\frac{x}{c}} + (-0.1260) \left(\frac{x}{c}\right) + (-0.3516) \left(\frac{x}{c}\right)^2 + 0.2843 \left(\frac{x}{c}\right)^3 + (-0.1015) \left( \frac{x}{c} \right)^4 \right]
-\end{equation}
-The coordinate pairs of points on the upper $(x_U, y_U)$ and lower $(x_L, y_L)$ surface are simply $x_U = x_L = x$, $y_U = y_t$, and $y_L = -y_t$. A symmetric airfoil corresponds to the NACA 00zz series. One example is NACA 0012, shown in \figref{fig:naca0012}.
-
-Cambered NACA airfoils define thickness perpendicular to the camber line, which can be defined as
-\begin{equation}
-y_c = \begin{cases}
-m \frac{x}{p^2} \left( 2p-\frac{x}{c}\right) & 0 \le x \le pc \\
-m \frac{c-x}{(1-p)^2} \left(1-2p+\frac{x}{c}\right) & pc \le x \le c
-\end{cases}
-\end{equation}
-The upper and lower coordinate pairs become
-\begin{equation}
-\begin{aligned}
-x_U &= x - y_t \sin \theta &\quad y_U &= y_c + y_t \cos \theta \\
-x_L &= x + y_t \sin \theta &\quad y_L &= y_c - y_t \cos \theta
-\end{aligned}
-\end{equation}
-where
-\begin{equation}
-\theta = \arctan \left( \dd{y_c}{x} \right)
-\quad \text{and} \quad
-\dd{y_c}{x} =
-\begin{cases}
-\frac{2m}{p^2} \left( p - \frac{x}{c} \right) & 0 \le x \le pc \\
-\frac{2m}{(1-p)^2} \left( p - \frac{x}{c} \right) & pc \le x \le c
-\end{cases}
-\end{equation}
-
-Because cambered profiles are generated from their symmetric counterparts, we can analytically determine the displacements necessary to deform any symmetric NACA mesh into an arbitrary 4-digit NACA mesh. This results in substantial efficiency gains. In our case, we create a CAD model of a NACA 0012 airfoil, mesh it, and partition it once. Then, in the initialization stage of a new simulation, we generate a stochastic NACA realization parameterized by random variables $\mb{m}$, $\mb{p}$, and $\mb{t}$. Each mesh node on the airfoil surface is prescribed a displacement based on its $x$-coordinate, which is then passed to a linear elastic structural solver. Numerical solution of the unsteady incompressible Navier-Stokes equations proceeds on the deformed mesh.
 
 \section{Conclusion and Discussion}
+
 
 %%
 %% DOCUMENT END

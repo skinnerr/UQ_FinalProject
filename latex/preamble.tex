@@ -7,6 +7,7 @@
 \usepackage[scaled]{beramono} % Lovely monospace font
 \usepackage[T1]{fontenc}
 %\usepackage{amsmath, amssymb}
+\usepackage{bm}
 \usepackage{mathtools}
 \usepackage{mathdots}
 \usepackage{titlesec} % Custom section headings.
@@ -170,6 +171,9 @@ basicstyle=\ttfamily
 
 % Big O notation
 \newcommand{\bigo}{\ensuremath{\mathcal{O}}}
+
+% Citation flag
+\newcommand{\citeme}{{\color{red}\textbf{[cite]}}}
 
 % Derivatives
 \newcommand{\dd}[2]{\ensuremath{\frac{d #1}{d #2}}}

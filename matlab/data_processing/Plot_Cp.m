@@ -4,12 +4,12 @@ function [] = Plot_Cp()
 
     nfiles = 100;
     alpha_threshold = 0;
-%     [NdatL, NstatL] = Load_Processed_Data('original-LF', nfiles, alpha_threshold);
-%     [NdatH, NstatH] = Load_Processed_Data('original-HF', nfiles, alpha_threshold);
+    [NdatL, NstatL] = Load_Processed_Data('original-LF', nfiles, alpha_threshold);
+    [NdatH, NstatH] = Load_Processed_Data('original-HF', nfiles, alpha_threshold);
 %     [NdatL, NstatL] = Load_Processed_Data('geometry-LF', nfiles, alpha_threshold);
 %     [NdatH, NstatH] = Load_Processed_Data('geometry-HF', nfiles, alpha_threshold);
-    [NdatL, NstatL] = Load_Processed_Data('attack-LF', nfiles, alpha_threshold);
-    [NdatH, NstatH] = Load_Processed_Data('attack-HF', nfiles, alpha_threshold);
+%     [NdatL, NstatL] = Load_Processed_Data('attack-LF', nfiles, alpha_threshold);
+%     [NdatH, NstatH] = Load_Processed_Data('attack-HF', nfiles, alpha_threshold);
 
     %%%
     % Compute ID and calculate bi-fiedlity model
@@ -27,27 +27,29 @@ function [] = Plot_Cp()
     
     [m, n] = size(UL); % Number of rows and cols in the LF data
     r = min(m,n);       % Maximal rank
-    tol = 1e-5;         % Approximate tolerance for ID
+    tol = 0.8;         % Approximate tolerance for ID
     
     % generate an approximately low-rank matrix
-    [~,S,~] = svd(UL);
-    Sdiag = diag(S(1:r,1:r))/S(1,1);
+    [~,SL,~] = svd(UL);
+    SLdiag = diag(SL(1:r,1:r))/SL(1,1);
+    [~,SH,~] = svd(UH);
+    SHdiag = diag(SH(1:r,1:r))/SH(1,1);
 
     % plot the singular values of U_c just to see the rank
     figure();
-    semilogy(Sdiag,'ro')
+    subplot(1,2,1);
+    semilogy(SLdiag,'ro')
     title('Singular Values of U_L')
+    subplot(1,2,2);
+    semilogy(SHdiag,'ro')
+    title('Singular Values of U_H')
 
     % Perform ID and bi-fidelity modeling
     [P,ix] = matrixID(UL,tol^2); % P is the coefficient matrix and ix is the basis index
     
     % Truncate the expansion and compute reduced-order models
-    fraction_to_keep = 0.5;
-    cutoff = round(length(ix)*fraction_to_keep);
-    ULix = UL(:,ix);
-    UHix = UH(:,ix);
-    UL_id = ULix(:,1:cutoff) * P(1:cutoff,:);
-    UH_id = UHix(:,1:cutoff) * P(1:cutoff,:);
+    UL_id = UL(:,ix) * P;
+    UH_id = UH(:,ix) * P;
     
     % Compute errors.
     err_id_L = norm(UL - UL_id,'fro')/norm(UL,'fro');
@@ -67,37 +69,31 @@ function [] = Plot_Cp()
     xH = NstatH.x_avg_twosurf;
     
     rows = 1;
-    cols = 4;
-    yrange = [-2.5,1.2];
+    cols = 2;
+    yrange = [-2,1];
     figure();
     
     subplot(rows, cols, 1);
     hold on;
-    h = plot(xL, UL, 'k.');
-    hleg = legend(h(1), 'UL');
+    ha = plot(xL, UL, 'ro');
+    hb = plot(xL, UL_id, 'k.');
+    hleg = legend([ha(1),hb(1)], {'Original LF Data','ID Approximation of LF'});
     set(hleg, 'Location', 'southeast');
     ylim(yrange);
+    ylabel('Cp');
+    xlabel('Streamwise Location');
+    title('Low-Fidelity');
     
     subplot(rows, cols, 2);
     hold on;
-    h = plot(xL, UL_id, 'b.');
-    hleg = legend(h(1), sprintf('UL_id (%.2f)',fraction_to_keep));
+    ha = plot(xH, UH, 'ro');
+    hb = plot(xH, UH_id, 'k.');
+    hleg = legend([ha(1),hb(1)], {'Original HF Data','Bi-Fidelity Model'});
     set(hleg, 'Location', 'southeast');
     ylim(yrange);
-    
-    subplot(rows, cols, 3);
-    hold on;
-    h = plot(xH, UH, 'k.');
-    hleg = legend(h(1), 'UH');
-    set(hleg, 'Location', 'southeast');
-    ylim(yrange);
-    
-    subplot(rows, cols, 4);
-    hold on;
-    h = plot(xH, UH_id, 'b.');
-    hleg = legend(h(1),  sprintf('UH_id (%.2f)',fraction_to_keep));
-    set(hleg, 'Location', 'southeast');
-    ylim(yrange);
+    ylabel('Cp');
+    xlabel('Streamwise Location');
+    title('High-Fidelity');
     
 %     figure();
 %     hold on;

@@ -1,4 +1,4 @@
-function [yt, xu, yu, xl, yl] = naca_coords(x, m, p, t, a)
+function [yt, xu, yu, xl, yl, yc] = naca_coords(x, m, p, t, a)
 %%%
 % Generates upper (xu, yu) and lower (xl, yl) surfaces of a 4-digit NACA airfoil.
 %

@@ -8,8 +8,9 @@ t = 15/100; % Max thickness over chord (zz / 100)
 c = 1.0;    % Chord length
 a = 8;     % Angle of attack
 
-x0  = [linspace(0.00001,0.1,20), linspace(0.11,1,80)];
-[~, xu0, yu0, xl0, yl0] = naca_coords(x0, 0.0, 0.0, 0.12, 0.0);
+x0 = [linspace(0.00001,0.1,20), linspace(0.11,1,80)];
+[~, xu0, yu0, xl0, yl0, yc] = naca_coords(x0, 0.0, 0.0, 0.12, 0.0);
+% [~, xu0, yu0, xl0, yl0, yc] = naca_coords(x0, 0.04, 0.4, 0.12, 0.0);
 
 xu = nan(size(x0));
 yu = nan(size(x0));
@@ -34,10 +35,11 @@ figure();
 hold on;
 plot([x0;xu],[yu0;yu],'k-', 'LineWidth', 1); % Upper deltas
 plot([x0;xl],[yl0;yl],'k-', 'LineWidth', 1); % Lower deltas
-plot(x0,yu0,'b-', 'LineWidth', 4); % Original upper
-plot(x0,yl0,'b-', 'LineWidth', 4); % Original lower
-plot(xu,yu,'r-', 'LineWidth', 4); % Transformed upper
-plot(xl,yl,'r-', 'LineWidth', 4); % Transformed lower
+plot(x0,yu0,'r-', 'LineWidth', 3); % Original upper
+plot(x0,yl0,'r-', 'LineWidth', 3); % Original lower
+% plot(x0,yc,'k-', 'LineWidth', 4); % Camber
+plot(xu,yu,'b-', 'LineWidth', 3); % Transformed upper
+plot(xl,yl,'b-', 'LineWidth', 3); % Transformed lower
 % title(sprintf('m = %.2f, p = %.2f, t = %.2f, c = %.2f, a = %.1f',m,p,t,c,a));
 xlabel('x');
 ylabel('y');
