@@ -19,7 +19,8 @@ function [] = Validate_Cp()
     figure();
     hold on;
 %     hdots = plot(dat.xnorm, dat.y, 'k-o', 'MarkerSize', 3);
-    hdots = plot(x_special, dat.cp, 'r-x', 'MarkerSize', 3);
+    hdots = plot(dat.x, dat.cp, 'r-x', 'MarkerSize', 3);
+%     hdots = plot(x_special, dat.cp, 'r-x', 'MarkerSize', 3);
     xlabel('Streamwise Location CW from Trailing Edge [1 / Streamwise Chord]');
     ylabel('Coefficient of Pressure');
     legend([hdots], {'CFD'});
