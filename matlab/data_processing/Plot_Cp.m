@@ -67,7 +67,7 @@ function [] = Plot_Cp()
     
     [m, n] = size(UL); % Number of rows and cols in the LF data
     r = min(m,n);       % Maximal rank
-    tol = 1e-10;         % Approximate tolerance for ID
+    tol = 1e-1;         % Approximate tolerance for ID
     
     % generate an approximately low-rank matrix
     [~,SL,~] = svd(UL);
@@ -110,6 +110,8 @@ function [] = Plot_Cp()
     fprintf(' Accuracy of ID for fine model   = %e\n', err_id_H) 
     fprintf(' Approximation rank              = %d\n', length(ix));
 
+    return
+    
     %%%
     % Plot results
     %%%

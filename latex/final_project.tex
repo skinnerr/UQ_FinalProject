@@ -44,7 +44,7 @@ $^1$University of Colorado, Boulder, CO USA
 \end{center}
 
 \section*{Abstract}
-This bi-fidelity investigation explores the effect of variation in geometry and angle of attack on the performance of a 2-D NACA 4412 airfoil. The flow is incompressible and is characterized by a Reynolds number of 3 million. All simulations are steady and rely on the Spalart-Allmaras (SA) RANS turbulence closure. Low-fidelity simulations use a coarse mesh with unresolved boundary layers (BLs), whereas high-fidelity simulations employ a refined mesh that fully resolves the near-wall BL. Predictive capacity of the bi-fidelity approach is analysed with pressure coefficient data.
+This bi-fidelity investigation explores the effect of variation in geometry and angle of attack on the performance of a 2-D NACA 4412 airfoil. The flow is incompressible and is characterized by a Reynolds number of 3 million. All simulations are steady and rely on the Spalart-Allmaras (SA) RANS turbulence closure \citep{spalart1992}. Low-fidelity simulations use a coarse mesh with unresolved boundary layers (BLs), whereas high-fidelity simulations employ a refined mesh that fully resolves the near-wall BL. Predictive capacity of the bi-fidelity approach is analysed with pressure coefficient data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,7 +56,7 @@ The need to characterize and optimize the design of unsteady aerodynamic systems
 
 The bi-fidelity approach seeks to address the shortcomings of traditional brute-force UQ/DO strategies. Bi-fidelity modeling has two steps. First, a number of low-fidelity (LF) simulations are run. LF simulations do not capture the exact physics of the system, but place low demand on computational resources. These LF realizations are used to generate both an interpolation and a low-rank approximation of a solution quantity as a function of design parameters. For aerodynamics, LF simulations may employ less stringent numerical convergence criteria, coarser meshes, or less-accurate turbulence models. Second, high-fidelity (HF) simulations are run for each combination of parameters deemed important by the low-rank approximation. HF simulations are ideally as accurate as possible, addressing all shortcomings of the LF model. The HF results are used in conjunction with the low-fidelity interpolating coefficients to approximate the solution response over the parameter space.
 
-The present work seeks to quantify the effect of variability in geometric parameters defining a NACA 4-digit series airfoil on the $C_p$ distribution across its surface. Though 2-D NACA airfoils command little topical interest, this family is nonetheless selected for two reasons. First, it is a standard academic geometry that was thoroughly studied in the 1930s and '40s, resulting in readily-available validation data \citeme. Second, applying the bi-fidelity approach to a NACA airfoil offers a proving ground for the method and analysis tools, which can be scaled up to more industrially-relevant systems in future work. Ultimately, this technology will be extended to multi-fidelity simulations of flow over complex engineering geometries characterized by highly-unsteady separation. Such examples could include a multi-element airfoil at high-$\alpha$ or active flow control in an aggressive subsonic diffuser.
+The present work seeks to quantify the effect of variability in geometric parameters defining a NACA 4-digit series airfoil on the $C_p$ distribution across its surface. Though 2-D NACA airfoils command little topical interest, this family is nonetheless selected for two reasons. First, it is a standard academic geometry that was thoroughly studied in the 1930s and '40s, resulting in readily-available validation data \cite{NACA824}. Second, applying the bi-fidelity approach to a NACA airfoil offers a proving ground for the method and analysis tools, which can be scaled up to more industrially-relevant systems in future work. Ultimately, this technology will be extended to multi-fidelity simulations of flow over complex engineering geometries characterized by highly-unsteady separation. Such examples could include a multi-element airfoil at high-$\alpha$ or active flow control in an aggressive subsonic diffuser.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,7 +153,7 @@ To seek a steady solution, both LF and HF simulations are run at a fairly large 
 
 For both the LF and HF runs, we begin by meshing the fluid volume around a standard NACA 0012 airfoil at zero angle of attack, the outline of which is shown in Figure \ref{fig:naca_deform}. This allows us to iterate the mesh until it adequately captures the curvature of this family of airfoils. The only distinguishing factor between the low- (LF) and high-fidelity (HF) runs is the mesh resolution; they use the following ``coarse'' and ``fine'' meshes, respectively.
 
-Both coarse and fine meshes are created by extruding a mesh on the $+z$-face in the -$z$-direction through the domain, and then tetrahedronizing the entire mesh. Results of meshing are shown in Figure \ref{fig:mesh_coarse}. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, whereas the fine mesh does, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$~m ($y^+_\tmin \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at $0.01$~m ($y^+_\tmin \sim 4 \times 10^4$) with the same gradation factor. The fine BL mesh conforms to recommendations by Spalart \citeme. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
+Both coarse and fine meshes are created by extruding a mesh on the $+z$-face in the -$z$-direction through the domain, and then tetrahedronizing the entire mesh. Results of meshing are shown in Figure \ref{fig:mesh_coarse}. Because geometric variation is central to this study, both meshes attempt to resolve airfoil curvature as well as possible. There are two main differences between the meshes: (1) the coarse mesh makes no attempt to resolve the shear layer downstream of the trailing edge, whereas the fine mesh does, and (2) the fine mesh fully resolves the boundary layer (BL) with a first point off the wall at $2\times 10^{-6}$~m ($y^+_\tmin \sim 0.1$) and gradation factor of 0.8, whereas the coarse mesh has a first point off the wall at $0.01$~m ($y^+_\tmin \sim 4 \times 10^4$) with the same gradation factor. The fine BL mesh conforms to recommendations by Spalart \citep{spalart2001}. The coarse mesh's $y^+$ is already well past the defect layer of a turbulent BL, and therefore has no hope of accurately capturing wall effects.
 
 \begin{figure}[t]
 \begin{center}
@@ -184,9 +184,11 @@ Both coarse and fine meshes are created by extruding a mesh on the $+z$-face in 
 
 The converged NACA 0012 flow solution acts as the starting point for each new combination of geometric parameters we want to test. This means we skip the start-up transient of ``turning on'' the simulated wind tunnel for subsequent geometries, resulting in efficiency gains. Geometric parameters are specified in an ASCII input file. Upon reading this file, PHASTA applies a displacement to each node on the surface of the airfoil, represented by the black lines in Figure \ref{fig:naca_deform}. A linear elastic structural solver\footnote{Courtesy of Eric Peters, University of Colorado at Boulder} satisfies the displacement constraints and deforms the entire mesh in accordance with the specified geometric parameters. Positive volumes on BL elements are preserved by enforcing an inverse relationship between element volume and stiffness. As before, numerical solution of the flow equations proceeds until statistically-steady results are obtained.
 
+Resource consumption should be discussed briefly. A single LF run takes roughly 15 seconds, whereas a single HF run can require as long as 15 minutes (roughly two orders of magnitude longer). To accelerate data acquisition, 16 runs were conducted simultaneously. Both LF and HF simulations could only be run in serial.
+
 \subsection{Interpolating Decomposition and Runs Conducted}
 
-Three sets of random geometric parameters used, corresponding to cases 1, 2, and 3 in Table \ref{tbl:rand_params}. For a given case, we represent them as the stochastic vector 
+Three sets of random geometric parameters used, corresponding to Cases 1, 2, and 3 in Table \ref{tbl:rand_params}. For a given case, we represent them as the stochastic vector
 \begin{equation}
 \bm{y} = \begin{bmatrix}
 \bm{m} & \bm{p} & \bm{t} & \bm{c} & \bm{\alpha}
@@ -222,7 +224,7 @@ The set of $K$ LF solutions are collected into a matrix
 \vline & \vline & & \vline
 \end{bmatrix}_{m \times K}
 \end{equation}
-where each column holds a single LF solution vector. An interpolating decomposition \citeme (ID) constructs a rank-$r$ approximation to $\bm{U}^L$ as the product of a column skeleton matrix $\bm{U}^L_C$ and the coefficient matrix $\bm{\Lambda}^L$.
+where each column holds a single LF solution vector. An interpolating decomposition (ID) constructs a rank-$r$ approximation to $\bm{U}^L$ as the product of a column skeleton matrix $\bm{U}^L_C$ and the coefficient matrix $\bm{\Lambda}^L$ \citep{doostan2016}.
 \begin{equation}
 \begin{aligned}
 \bm{U}^L
@@ -270,9 +272,93 @@ For each case in Table \ref{tbl:rand_params}, $K=1000$ LF and 1000 HF runs are c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Singular value decompositions for Cases 1--3 are presented in Figure \ref{fig:svd}. These plots give some insight into how accurate we can expect the ID to be for a given rank $r$.
 
+The main results for Cases 1--3, which use a full-rank ($r=72$) ID, are shown in Figures \ref{fig:case1}--\ref{fig:case3}. These plot the LF data, the HF data, the ID, and the bi-fidelity model. Furthermore, the mean and variance of each of these four data sets is overlayed as a function of location on airfoil. The ``location on airfoil'' is calculated as the stream-wise distance from the airfoil's trailing edge. Moving clockwise around the airfoil is interpreted as the positive direction, so positive values correspond to the lower surface, while negative values correspond to the upper surface.
+
+A piecemeal ID rank-reduction study was also performed; it yielded the following results. A more rigorous study of relative error as a function of ID rank could be conducted in the future.
+\begin{description}
+\item{\textbf{Case 1}} (full-rank relative error of $18\%$) achieved
+	\begin{itemize}
+	\item $37\%$ relative error with $r=6$,
+	\item $28\%$ relative error with $r=17$, and
+	\item $19\%$ relative error with $r=46$.
+	\end{itemize}
+\item{\textbf{Case 2}} (full-rank relative error of $0.14\%$) achieved
+	\begin{itemize}
+	\item $3.6\%$ relative error with only $r=2$, and 
+	\item $0.18\%$ with $r=5$.
+	\end{itemize}
+\item{\textbf{Case 3}} (full-rank relative error of $1.8\%$) achieved
+	\begin{itemize}
+	\item $3.7\%$ relative error with $r=13$, and
+	\item $2.5\%$ with $r=33$.
+	\end{itemize}
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+The SVD results corroborate the trends in the full-rank ID performance and in the rank-reduction study. Specifically, we conclude that Case 1 is not a very sparse system, whereas Case 3 and especially Case 2 are sparse. For the the latter two cases, the bi-fidelity model performs well with respect to relative error in the Frobenius norm.
+
+Even when the bi-fidelity model has poor relative error in the rigorous Frobenius norm, it seems that the bi-fidelity model may still accurately capture first- and second-order moments of these particular $C_p$ distributions. For example, though Case 1's full-rank bi-fidelity model has nearly $18\%$ relative error, it appears to predict the mean very accurately, and the variance fairly accurately. This avenue of investigation merits further quantitative study.
+
+Before drawing concrete conclusions from the present work, the HF model needs to be improved. Validating the $C_p$ plots against readily available experimental and computational data, saw some discrepancies. We attribute these to insufficient mesh refinement on the leading edge's pressure surface, and in the downstream shear layer.
+
+Despite this issue, it appears that the physical system of a NACA airfoil considered in this report is at least amenable to bi-fidelity modeling, insofar as the prediction of $C_p$ along the airfoil surface is concerned. This is particularly surprising, because the LF model did not resolve any portion of the turbulent boundary layer. Nonetheless, it seems it was able to capture trends in the system and produce a fairly accurate coefficient matrix $\bm{\Lambda}^L$. Considering the HF runs are roughly two orders of magnitude more computationally expensive than their LF counterparts, the efficiency gains realized by even a full-rank ID are substantial.
+
+There are a number of directions along which the present work can be extended. First and foremost, the HF mesh must be improved and validated. Subsequently, turbulence wall-modeling could be added to the LF model or higher angles of attack with pronounced separation could be considered. Ultimately, this work acts as a stepping stone to the study of how various turbulence models, complex geometries, and highly-unsteady aerodynamic systems interact in the context of multi-fidelity modeling.
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{svd_case1.png} \\
+\includegraphics[width=0.8\textwidth]{svd_case2.png} \\
+\includegraphics[width=0.8\textwidth]{svd_case3.png}
+\\[1ex]
+\caption{Singular values of $\bm{U}^L$ for Cases 1--3. This provides insight into what sort of accuracy we can expect when using $r$ basis vectors in the ID.}
+\label{fig:svd}
+\end{center}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=\textwidth]{CpSpread_case1_r72.png}
+\\[1ex]
+\caption{(Case 1) Original LF and HF data, and the full-rank ($r=72$) ID and bi-fidelity model. Bi-fidelity relative error is high at $\sim 18\%$, but mean and variance are captured reasonably well.}
+\label{fig:case1}
+\end{center}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=\textwidth]{CpSpread_case2_r72.png}
+\\[1ex]
+\caption{(Case 2) Original LF and HF data, and the full-rank ($r=72$) ID and bi-fidelity model. Bi-fidelity relative error is low at $\sim 0.14\%$.}
+\label{fig:case2}
+\end{center}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=\textwidth]{CpSpread_case3_r72.png}
+\\[1ex]
+\caption{(Case 3) Original LF and HF data, and the full-rank ($r=72$) ID and bi-fidelity model. Bi-fidelity relative error is low at $\sim 1.8\%$.}
+\label{fig:case3}
+\end{center}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{sources}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
 %% DOCUMENT END
