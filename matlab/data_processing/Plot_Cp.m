@@ -110,8 +110,6 @@ function [] = Plot_Cp()
     fprintf(' Accuracy of ID for fine model   = %e\n', err_id_H) 
     fprintf(' Approximation rank              = %d\n', length(ix));
 
-    return
-    
     %%%
     % Plot results
     %%%
