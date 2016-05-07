@@ -28,7 +28,7 @@ function [ NACA_data, NACA_stats ] = Load_Processed_Data( identifier_string, nfi
         if strcmp(identifier_string, 'geometry-LF')
             path = [main_data_dir, 'geometry-lf/'];
         elseif strcmp(identifier_string, 'geometry-HF')
-            path = [main_data_dir, 'geometry-lf/'];
+            path = [main_data_dir, 'geometry-hf/'];
         end 
     else
         error('String "%s" not recognized',identifier_string);
