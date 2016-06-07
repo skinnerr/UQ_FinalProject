@@ -2,7 +2,7 @@ function [] = Plot_Cp()
 
     Set_Default_Plot_Properties();
 
-    case_id = 4; % Valid numbers: 1,2,3
+    case_id = 2; % Valid numbers: 1,2,3
     reload_data = false;
     
     if reload_data
@@ -110,7 +110,7 @@ function [] = Plot_Cp()
     % Perform ID and bi-fidelity modeling
     [P,ix] = matrixID(UL,tol^2); % P is the coefficient matrix and ix is the basis index
     
-    % Truncate the expansion and compute reduced-order models
+    % Compute reduced-order models
     UL_id = UL(:,ix) * P;
     UH_id = UH(:,ix) * P;
     
@@ -196,6 +196,43 @@ function [] = Plot_Cp()
 %     xlabel('Streamwise Location CW from Trailing Edge [1 / Streamwise Chord]');
 %     ylabel('Coefficient of Pressure');
 %     legend([hdots, hrange, h3std, hmean], {'Realizations', 'Range', '3 stdev', 'Mean'});
+
+
+    % Low-fidelity standard Cp plot
+    figure();
+    hold on;
+    errorbar(NstatL.x_avg, NstatL.cp_avg, ...
+             abs(NstatL.cp_avg - NstatL.cp_min), ...
+             abs(NstatL.cp_avg - NstatL.cp_max));
+    title('Low-fidelity');
+    xlabel('x [m]');
+    ylabel('Cp');
+    xlim([-0.05,1.05]);
+    ylim([-1,1]);
+         
+    % High-fidelity standard Cp plot
+    figure();
+    hold on;
+    errorbar(NstatH.x_avg, NstatH.cp_avg, ...
+             abs(NstatH.cp_avg - NstatH.cp_min), ...
+             abs(NstatH.cp_avg - NstatH.cp_max));
+    title('High-fidelity');
+    xlabel('x [m]');
+    ylabel('Cp');
+    xlim([-0.05,1.05]);
+    ylim([-1,1]);
+         
+    % Bi-fidelity standard Cp plot
+    figure();
+    hold on;
+    errorbar(NstatH.x_avg, mean(UH_id,2), ...
+             abs(mean(UH_id,2) - max(UH_id,[],2)), ...
+             abs(mean(UH_id,2) - min(UH_id,[],2)));
+    title('Bi-fidelity');
+    xlabel('x [m]');
+    ylabel('Cp');
+    xlim([-0.05,1.05]);
+    ylim([-1,1]);
 
 end
 
