@@ -2,7 +2,7 @@ function [] = Plot_Cp()
 
     Set_Default_Plot_Properties();
 
-    case_id = 2; % Valid numbers: 1,2,3
+    case_id = 4; % Valid numbers: 1,2,3
     reload_data = false;
     
     if reload_data
@@ -58,13 +58,11 @@ function [] = Plot_Cp()
             case 4
                 load geometryattack-LF-dat.mat
                 load geometryattack-LF-stat.mat
-%                 load geometryattack-HF-dat.mat
-%                 load geometryattack-HF-stat.mat
-                load attack-HF-dat.mat %PLACEHOLDER
-                load attack-HF-stat.mat%PLACEHOLDER
+                load geometryattack-HF-dat.mat
+                load geometryattack-HF-stat.mat
         end
     end
-
+    
     %%%
     % Compute ID and calculate bi-fiedlity model
     %%%
@@ -114,22 +112,64 @@ function [] = Plot_Cp()
     UL_id = UL(:,ix) * P;
     UH_id = UH(:,ix) * P;
     
+    % Compute HF data interpolated at LF coordinates.
+    UH_interp = nan(size(UL));
+    for i = 1:size(UH,2)
+        % Interpolate upper and lower surfaces separately (otherwise interp1 breaks).
+        [~,indL] = max(NdatL(i).x);
+        [~,indH] = max(NdatH(i).x);
+        UH_interp(     1:indL,i) = interp1_bounded(NdatH(i).x(1:indH), ...
+                                                   NdatH(i).cp(1:indH), ...
+                                                   NdatL(i).x(1:indL));
+        UH_interp(indL+1:end ,i) = interp1_bounded(NdatH(i).x(indH+1:end), ...
+                                                   NdatH(i).cp(indH+1:end), ...
+                                                   NdatL(i).x(indL+1:end));
+%         figure();
+%         hold on;
+%         plot(NdatH(i).x, NdatH(i).cp, 'ko');
+%         plot(xL, UH_interp(:,i), 'r+');
+%         return
+    end
+    
     % Compute errors.
     err_id_L = norm(UL - UL_id,'fro')/norm(UL,'fro');
     err_id_H = norm(UH - UH_id,'fro')/norm(UH,'fro');
+    err_LvH  = norm(UL - UH_interp,'fro')/norm(UH_interp,'fro');
 
     fprintf('*** RESULTS ***\n')
     fprintf(' Desired accuracy                = %e\n', tol)
-    fprintf(' Accuracy of ID for coarse model = %e\n', err_id_L) 
-    fprintf(' Accuracy of ID for fine model   = %e\n', err_id_H) 
+    fprintf(' Accuracy of LF model vs HF      = %e\n', err_LvH)
+    fprintf(' Accuracy of ID for coarse model = %e\n', err_id_L)
+    fprintf(' Accuracy of ID for fine model   = %e\n', err_id_H)
     fprintf(' Approximation rank              = %d\n', length(ix));
+    
+    % Truncate matrices to be plotted if desired.
+    if false
+        trunc_number = 10;
+        UL = UL(:,1:trunc_number);
+        UH = UH(:,1:trunc_number);
+        UL_id = UL_id(:,1:trunc_number);
+        UH_id = UH_id(:,1:trunc_number);
+        UH_interp = UH_interp(:,1:trunc_number);
+    end
 
     %%%
     % Plot results
     %%%
     
-    xL = NstatL.x_avg_twosurf;
-    xH = NstatH.x_avg_twosurf;
+    % Shorthand for average positions.
+    xLavg = NstatL.x_avg_twosurf;
+    xHavg = NstatH.x_avg_twosurf;
+    
+    % Shorthand for individual positions.
+    xL = nan(size(UL));
+    for i = 1:size(UL,2)
+        xL(:,i) = NdatL(i).x_twosurf;
+    end
+    xH = nan(size(UH));
+    for i = 1:size(UH,2)
+        xH(:,i) = NdatH(i).x_twosurf;
+    end
     
     rows = 1;
     cols = 2;
@@ -140,10 +180,11 @@ function [] = Plot_Cp()
     hold on;
     ha = plot(xL, UL, 'ro');
     hb = plot(xL, UL_id, 'k.');
-    hc = plot(xL, NstatL.cp_avg, 'c-',  'LineWidth', 2);
-    hd = plot(xL, mean(UL_id,2), 'm--', 'LineWidth', 2);
-    he = plot(xL, 5*NstatL.cp_var, 'b-',  'LineWidth', 2);
-    hf = plot(xL, 5*var(UL_id,0,2),'g--', 'LineWidth', 2);
+         plot(xL, UH_interp, 'g+');
+    hc = plot(xLavg, NstatL.cp_avg, 'c-',  'LineWidth', 2);
+    hd = plot(xLavg, mean(UL_id,2), 'm--', 'LineWidth', 2);
+    he = plot(xLavg, 5*NstatL.cp_var, 'b-',  'LineWidth', 2);
+    hf = plot(xLavg, 5*var(UL_id,0,2),'g--', 'LineWidth', 2);
     hleg = legend([ha(1),hc,he,hb(1),hd,hf], {'Original LF Data', ...
                                               '    mean', ...
                                               '    var*5', ...
@@ -160,10 +201,11 @@ function [] = Plot_Cp()
     hold on;
     ha = plot(xH, UH, 'ro');
     hb = plot(xH, UH_id, 'k.');
-    hc = plot(xH, NstatH.cp_avg, 'c-',  'LineWidth', 2);
-    hd = plot(xH, mean(UH_id,2), 'm--', 'LineWidth', 2);
-    he = plot(xH, 5*NstatH.cp_var, 'b-',  'LineWidth', 2);
-    hf = plot(xH, 5*var(UH_id,0,2),'g--', 'LineWidth', 2);
+         plot(xL, UH_interp, 'g+');
+    hc = plot(xHavg, NstatH.cp_avg, 'c-',  'LineWidth', 2);
+    hd = plot(xHavg, mean(UH_id,2), 'm--', 'LineWidth', 2);
+    he = plot(xHavg, 5*NstatH.cp_var, 'b-',  'LineWidth', 2);
+    hf = plot(xHavg, 5*var(UH_id,0,2),'g--', 'LineWidth', 2);
     hleg = legend([ha(1),hc,he,hb(1),hd,hf], {'Original HF Data', ...
                                               '    mean', ...
                                               '    var*5', ...
@@ -204,6 +246,7 @@ function [] = Plot_Cp()
     errorbar(NstatL.x_avg, NstatL.cp_avg, ...
              abs(NstatL.cp_avg - NstatL.cp_min), ...
              abs(NstatL.cp_avg - NstatL.cp_max));
+%              NstatL.cp_std);
     title('Low-fidelity');
     xlabel('x [m]');
     ylabel('Cp');
@@ -216,6 +259,7 @@ function [] = Plot_Cp()
     errorbar(NstatH.x_avg, NstatH.cp_avg, ...
              abs(NstatH.cp_avg - NstatH.cp_min), ...
              abs(NstatH.cp_avg - NstatH.cp_max));
+%              NstatH.cp_std);
     title('High-fidelity');
     xlabel('x [m]');
     ylabel('Cp');
@@ -228,6 +272,7 @@ function [] = Plot_Cp()
     errorbar(NstatH.x_avg, mean(UH_id,2), ...
              abs(mean(UH_id,2) - max(UH_id,[],2)), ...
              abs(mean(UH_id,2) - min(UH_id,[],2)));
+%              std(UH_id,1,2));
     title('Bi-fidelity');
     xlabel('x [m]');
     ylabel('Cp');
