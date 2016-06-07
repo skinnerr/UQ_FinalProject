@@ -29,7 +29,15 @@ function [ NACA_data, NACA_stats ] = Load_Processed_Data( identifier_string, nfi
             path = [main_data_dir, 'geometry-lf/'];
         elseif strcmp(identifier_string, 'geometry-HF')
             path = [main_data_dir, 'geometry-hf/'];
-        end 
+        end
+    elseif strcmp(identifier_string, 'geometryattack-LF') || strcmp(identifier_string, 'geometryattack-HF')
+        starting_run_number = 0;
+        params_file = [main_data_dir, 'naca_params_4412geomerr10alpha2tom2.csv'];
+        if strcmp(identifier_string, 'geometryattack-LF')
+            path = [main_data_dir, 'geometryattack-lf/'];
+        elseif strcmp(identifier_string, 'geometryattack-HF')
+            path = [main_data_dir, 'geometryattack-hf/'];
+        end
     else
         error('String "%s" not recognized',identifier_string);
     end

@@ -2,7 +2,7 @@ function [] = Plot_Cp()
 
     Set_Default_Plot_Properties();
 
-    case_id = 1; % Valid numbers: 1,2,3
+    case_id = 4; % Valid numbers: 1,2,3
     reload_data = false;
     
     if reload_data
@@ -30,6 +30,13 @@ function [] = Plot_Cp()
                 [NdatH, NstatH] = Load_Processed_Data('attack-HF', nfiles, alpha_threshold);
                     save('attack-HF-dat.mat', 'NdatH');
                     save('attack-HF-stat.mat', 'NstatH');
+            case 4
+                [NdatL, NstatL] = Load_Processed_Data('geometryattack-LF', nfiles, alpha_threshold);
+                    save('geometryattack-LF-dat.mat', 'NdatL');
+                    save('geometryattack-LF-stat.mat', 'NstatL');
+                [NdatH, NstatH] = Load_Processed_Data('geometryattack-HF', nfiles, alpha_threshold);
+                    save('geometryattack-HF-dat.mat', 'NdatH');
+                    save('geometryattack-HF-stat.mat', 'NstatH');
         end
     else
         switch case_id
@@ -48,6 +55,13 @@ function [] = Plot_Cp()
                 load attack-LF-stat.mat
                 load attack-HF-dat.mat
                 load attack-HF-stat.mat
+            case 4
+                load geometryattack-LF-dat.mat
+                load geometryattack-LF-stat.mat
+%                 load geometryattack-HF-dat.mat
+%                 load geometryattack-HF-stat.mat
+                load attack-HF-dat.mat %PLACEHOLDER
+                load attack-HF-stat.mat%PLACEHOLDER
         end
     end
 
@@ -66,8 +80,8 @@ function [] = Plot_Cp()
     end
     
     [m, n] = size(UL); % Number of rows and cols in the LF data
-    r = min(m,n);       % Maximal rank
-    tol = 1e-1;         % Approximate tolerance for ID
+    r = min(m,n);      % Maximal rank
+    tol = 1e-1;        % Approximate tolerance for ID
     
     % generate an approximately low-rank matrix
     [~,SL,~] = svd(UL);
