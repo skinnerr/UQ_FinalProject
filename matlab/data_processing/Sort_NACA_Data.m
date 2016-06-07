@@ -51,7 +51,7 @@ function [ data_out ] = Sort_NACA_Data( naca_params, data, starting_run_number, 
             top_indices = data(i).y(order) > camber_line;
             bot_indices = ~top_indices;
             
-            % Split the order to top indices go first, followed by negative indies in
+            % Split the order so top indices go first, followed by negative indies in
             % reverse.
             order = [order(top_indices); flip(order(bot_indices))];
             
@@ -65,6 +65,13 @@ function [ data_out ] = Sort_NACA_Data( naca_params, data, starting_run_number, 
             data_out(i-n_skipped).ref   = data(i).ref;
             data_out(i-n_skipped).filename = data(i).filename;
             data_out(i-n_skipped).params = [m, p, t, c0, c, a];
+            
+            datx = data_out(i-n_skipped).x;
+            [maxx,trailing_index] = max(datx);
+            x_twosurf = [         datx(1:trailing_index); ...
+                         maxx*2 - datx(trailing_index+1:end)];
+            x_twosurf = x_twosurf - maxx;
+            data_out(i-n_skipped).x_twosurf = x_twosurf;
             
         end
         
