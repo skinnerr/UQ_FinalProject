@@ -3,10 +3,14 @@ function [ ] = naca_realizations()
     Set_Default_Plot_Properties();
     
 %     % For a NACA airfoil numbered xyzz...
-    m = getRange(0.04, 0.1); % Max camber (x/100)
-    p = getRange(0.40, 0.1); % Location of max camber (y/10)
-    t = getRange(0.12, 0.1); % Max thickness over chord (zz / 100)
-    a = [0,0];  % Angle of attack
+    m0 = 0.04;
+    p0 = 0.40;
+    t0 = 0.12;
+    a0 = 13.87;
+    m = getRange(m0, 0.15); % Max camber (x/100)
+    p = getRange(p0, 0.15); % Location of max camber (y/10)
+    t = getRange(t0, 0.15); % Max thickness over chord (zz / 100)
+    a = getRange(a0, 0.00); % Angle of attack
 %     a = [-2,2];  % Angle of attack
 %     m = getRange(0.04, 0); % Max camber (x/100)
 %     p = getRange(0.4, 0); % Location of max camber (y/10)
@@ -37,8 +41,8 @@ function [ ] = naca_realizations()
         geom_coords(n,4,:) = yl;
     end
     
-%     writetable(array2table(params, 'VariableNames', {'m','p','t','c','a'}), ...
-%                '../naca_params_4412geomerr10alpha2tom2.csv');
+    writetable(array2table(geom_params, 'VariableNames', {'m','p','t','c','a'}), ...
+               '../naca_params_4412geomerr15pctalpha13p87.csv');
     
     
     if false
@@ -105,7 +109,7 @@ function [ ] = naca_realizations()
         color = 'r';
         fill(X,Y,color,'EdgeColor','k');
         % Generate and plot NACA 4412 airfoil.
-        [~, xu, yu, xl, yl] = naca_coords(x, 0.04, 0.4, 0.12, 0.0);
+        [~, xu, yu, xl, yl] = naca_coords(x, m0, p0, t0, a0);
         plot(xu,yu,'k');
         plot(xl,yl,'k');
         xlim([min(x),max(x)] + [-1,1]*range(x)/20);
